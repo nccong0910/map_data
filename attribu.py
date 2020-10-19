@@ -10,7 +10,17 @@ def check_product_import(self, convert, product, products_ext):
 			position = 0
 			for option in convert['attributes']:
 				if option['option_value_name'] and option['option_value_name'] != '':
-					pro_attr_code = self.get_pro_attr_code_default(option)
+					pro_attr_code = to_str(option['option_name']).lower()
+					pro_attr_code = pro_attr_code.replace(' ', '_')
+					if option['option_code']:
+						pro_attr_code = to_str(option['option_code']).lower()
+						pro_attr_code = pro_attr_code.replace(' ', '_')
+					pro_attr_code_len = 28
+					check_encode = chardet.detect(pro_attr_code.encode())
+					if check_encode['encoding'] != 'ascii':
+						pro_attr_code = pro_attr_code[0:14]
+						pro_attr_code_len = 200
+					pro_attr_code = self.sanitize_title(pro_attr_code, pro_attr_code_len)
 					if (to_int(option.get('is_taxonomy')) == 1 or option['option_id'] or not self.is_woo2woo()) and option['option_type'] != 'text':
 						woo_attribute_id = self.get_woo_attribute_id(pro_attr_code, option['option_name'], language_code, option)
 						if not woo_attribute_id:
